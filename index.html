@@ -17,7 +17,10 @@
 <body>
     <nav class="navbar bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Graph Algorithms Visualiser</a>
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <a class="navbar-brand" href=".">Graph Algorithms Visualiser</a>
+                <p class="m-0 fw-bold">Made By: <a class="" href="https://www.linkedin.com/in/itsmrvaibhav/" target="_blank">Vaibhav</a></p>
+            </div>
         </div>
     </nav>
     <div class="container-fluid">
@@ -26,7 +29,6 @@
                 <div class="row">
                     <div class="btn-group w-100">
                         <button type="button" class="btn btn-dark">Generate Graph</button>
-                        <button type="button" class="btn btn-success">Run</button>
                         <button type="button" class="btn btn-danger">Stop</button>
                     </div>
                     <div class="w-100"></div>
@@ -46,13 +48,13 @@
                                 </tr>
                                 <tr>
                                     <td id="dfsButton" style="cursor: pointer;" class="table-active"><u>Depth First Traversal</u></td>
-                                    <td>O(V)</td>
+                                    <td>O(V + E)</td>
                                     <td>O(V)</td>
                                     <td>All</td>
                                 </tr>
                                 <tr>
                                     <td id="bfsButton" style="cursor: pointer;" class="table-active"><u>Breadth First Traversal</u></td>
-                                    <td>O(V)</td>
+                                    <td>O(V + E)</td>
                                     <td>O(V)</td>
                                     <td>All</td>
                                 </tr>
@@ -61,13 +63,13 @@
                                 </tr>
                                 <tr>
                                     <td id="mstpButton" style="cursor: pointer;" class="table-active"><u>Prim's Algorithm</u></td>
-                                    <td>O(V)</td>
+                                    <td>O((V + E) * log (V))</td>
                                     <td>O(V)</td>
                                     <td>Undirected Weighted</td>
                                 </tr>
                                 <tr>
                                     <td id="mstkButton" style="cursor: pointer;" class="table-active"><u>Kruskal's Algorithm</u></td>
-                                    <td>O(V)</td>
+                                    <td>O(E * log (E))</td>
                                     <td>O(V)</td>
                                     <td>Undirected Weighted</td>
                                 </tr>
@@ -76,8 +78,8 @@
                                 </tr>
                                 <tr>
                                     <td id="djButton" style="cursor: pointer;" class="table-active"><u>Dijkstra’s Algorithm</u></td>
-                                    <td>O(V * E)</td>
-                                    <td>O(V)</td>
+                                    <td>O((V + E) * log E))</td>
+                                    <td>O(V + E)</td>
                                     <td>Undirected Weighted</td>
                                 </tr>
                                 <tr>
@@ -114,18 +116,18 @@
                                     <td colspan="5" class="table-primary">Articulation Points / Cut Vertices</td>
                                 </tr>
                                 <tr>
-                                    <td id="" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
-                                    <td>O()</td>
-                                    <td>O()</td>
+                                    <td id="dfsapButton" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
+                                    <td>O(V + E)</td>
+                                    <td>O(V)</td>
                                     <td>All</td>
                                 </tr>
                                 <tr>
                                     <td colspan="5" class="table-primary">Bridges / Cut Edges</td>
                                 </tr>
                                 <tr>
-                                    <td id="" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
-                                    <td>O()</td>
-                                    <td>O()</td>
+                                    <td id="dfsbButton" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
+                                    <td>O(V + E)</td>
+                                    <td>O(V)</td>
                                     <td>All</td>
                                 </tr>
                                 <tr>
@@ -160,7 +162,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-7 right-panel d-flex justify-content-center align-items-center" id="right-panel">
+            <div class="col-6 right-panel d-flex justify-content-center align-items-center" id="right-panel">
                 <div id="mountNode"></div>
             </div>
         </div>

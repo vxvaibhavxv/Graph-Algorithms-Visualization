@@ -114,6 +114,8 @@ const mstpButton = document.getElementById("mstpButton");
 const mstkButton = document.getElementById("mstkButton");
 const bfButton = document.getElementById("bfButton");
 const fwButton = document.getElementById("fwButton");
+const dfsapButton = document.getElementById("dfsapButton");
+const dfsbButton = document.getElementById("dfsbButton");
 
 let graph = new G6.Graph(config);
 graph.data(data);
@@ -179,6 +181,60 @@ fwButton.onclick = () => {
     floydWarshall();
 }
 
+dfsapButton.onclick = async () => {
+    clearConsole();
+    resetGraph();
+    let points = [];
+    let ids = [], lowLinks = [];
+    let counter = {
+        id: 0
+    };
+
+    for (let i = 0; i < v; i++) {
+        if (!visited[i]) {
+            addTextToConsole(`starting depth first traversal from ${getNodeLabel(i)} node to find articulation points`);
+            await articulationPointsDFS(i, -1, points, ids, lowLinks, counter);
+        }
+    };
+
+    addTextToConsole(`following are the articulation points found`);
+
+    if (points.length == 0) {
+        addTextToConsole(`no articulation points found`);
+    } else {
+        points.forEach((at, index) => {
+            addTextToConsole(`${getNodeLabel(at)}`);
+        });
+    }
+}
+
+dfsbButton.onclick = async () => {
+    clearConsole();
+    resetGraph();
+    let bridges = [];
+    let ids = [], lowLinks = [];
+    let counter = {
+        id: 0
+    };
+
+    for (let i = 0; i < v; i++) {
+        if (!visited[i]) {
+            addTextToConsole(`starting depth first traversal from ${getNodeLabel(i)} node to find bridges`);
+            await bridgesDFS(i, -1, bridges, ids, lowLinks, counter);
+        }
+    };
+
+    addTextToConsole(`following are the bridges found`);
+
+    if (bridges.length == 0) {
+        addTextToConsole(`no bridges found`);
+    } else {
+        bridges.forEach(([at, to, edgeIndex], index) => {
+            addTextToConsole(`[${getNodeLabel(at)}, ${getNodeLabel(to)}]`);
+        });
+    }
+}
+
 let g = {
     0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
     1: [[5, 18, 3], [6, 25, 4]],
@@ -187,6 +243,16 @@ let g = {
     4: [[1, 42, 8]],
     5: [],
     6: [[4, 23, 9]],
+};
+
+let dg = {
+    0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
+    1: [[0, 3, 0], [5, 18, 3], [6, 25, 4], [4, 42, 8]],
+    2: [[4, 40, 5], [0, 6, 1], [3, 10, 6]],
+    3: [[2, 10, 6], [4, 12, 7], [0, 16, 2]],
+    4: [[1, 42, 8], [2, 40, 5], [3, 12, 7], [6, 23, 9]],
+    5: [[1, 18, 3]],
+    6: [[4, 23, 9], [1, 25, 4]],
 };
 
 // from to weight edge-index
@@ -217,7 +283,7 @@ let v = 7;
 let visited = new Array(v).fill(false);
 let nodes = graph.getNodes();
 let edges = graph.getEdges();
-let delayValue = 250;
+let delayValue = 100;
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 function resetGraph() {
@@ -231,9 +297,102 @@ function resetGraph() {
         visited[i] = false;
 }
 
+async function bridgesDFS(at, parent, bridges, ids, lowLinks, counter) {
+    ids[at] = counter.id;
+    lowLinks[at] = counter.id;
+    visited[at] = true;
+    counter.id++;
+    markNodeVisiting(at);
+    await delay(delayValue);
+
+    for (let i = 0; i < dg[at].length; i++) {
+        let [to, w, edgeIndex] = dg[at][i];
+
+        if (to == parent) {
+            continue;
+        }
+
+        markEdgeVisiting(edgeIndex);
+        await delay(delayValue);
+
+        if (!visited[to]) {
+            await bridgesDFS(to, at, bridges, ids, lowLinks, counter);
+
+            lowLinks[at] = Math.min(lowLinks[at], lowLinks[to]);
+            markEdgeVisited(edgeIndex);
+            await delay(delayValue);
+
+            if (ids[at] < lowLinks[to]) {
+                bridges.push([at, to, edgeIndex]);
+                markEdgeSelected(edgeIndex);
+                await delay(delayValue);
+            }
+        } else {
+            lowLinks[at] = Math.min(lowLinks[at], ids[to]);
+            markEdgeVisited(edgeIndex);
+            await delay(delayValue);
+        }
+    }
+
+    markNodeVisited(at);
+    await delay(delayValue);
+}
+
+async function articulationPointsDFS(at, parent, points, ids, lowLinks, counter) {
+    ids[at] = counter.id;
+    lowLinks[at] = counter.id;
+    visited[at] = true;
+    counter.id++;
+    markNodeVisiting(at);
+    await delay(delayValue);
+    let children = 0, ap = false;
+
+    for (let i = 0; i < dg[at].length; i++) {
+        let [to, w, edgeIndex] = dg[at][i];
+
+        if (to == parent) {
+            continue;
+        }
+
+        markEdgeVisiting(edgeIndex);
+        await delay(delayValue);
+
+        if (!visited[to]) {
+            await articulationPointsDFS(to, at, points, ids, lowLinks, counter);
+
+            lowLinks[at] = Math.min(lowLinks[at], lowLinks[to]);
+            markEdgeVisited(edgeIndex);
+            await delay(delayValue);
+
+            if (ids[at] <= lowLinks[to] && parent != -1) {
+                points.push(at);
+                ap = true;
+                markNodeSelected(at);
+                await delay(delayValue);
+            }
+
+            children++;
+        } else {
+            lowLinks[at] = Math.min(lowLinks[at], ids[to]);
+            markEdgeVisited(edgeIndex);
+            await delay(delayValue);
+        }
+    }
+    
+    if (!ap) {
+        markNodeVisited(at);
+        await delay(delayValue);
+    }
+
+    if (parent == -1 && children > 1) {
+        points.push(at);
+        markNodeSelected(at);
+        await delay(delayValue);
+    }
+}
+
 async function dfs(at, order) {
     visited[at] = true;
-    addTextToConsole(`visiting node ${getNodeLabel(at)}`);
     order.push(at);
     markNodeVisiting(at);
     await delay(delayValue);
@@ -247,8 +406,6 @@ async function dfs(at, order) {
 
         if (!visited[to]) {
             await dfs(to, order);
-        } else {
-            addTextToConsole(`${getNodeLabel(to)} already visited`);
         }
 
         markEdgeVisited(edgeIndex);
@@ -268,7 +425,6 @@ async function bfs(start = 0, order) {
         order.push(at);
         markNodeVisiting(at);
         await delay(delayValue);
-        addTextToConsole(`visiting node ${getNodeLabel(at)}`);
 
         for (let i = 0; i < g[at].length; i++) {
             let to = g[at][i][0];
@@ -280,8 +436,6 @@ async function bfs(start = 0, order) {
             if (!visited[to]) {
                 visited[to] = true;
                 queue.push([to]);
-            } else {
-                addTextToConsole(`${getNodeLabel(to)} already visited`);
             }
         }
     }
@@ -339,10 +493,10 @@ async function primsMST() {
             await delay(delayValue);
         }
 
-        for (let i = 0; i < g[at].length; i++) {
-            let to = g[at][i][0];
-            let w = g[at][i][1];
-            let edgeIndex = g[at][i][2];
+        for (let i = 0; i < dg[at].length; i++) {
+            let to = dg[at][i][0];
+            let w = dg[at][i][1];
+            let edgeIndex = dg[at][i][2];
             markEdgeVisiting(edgeIndex);
             await delay(delayValue);
 
