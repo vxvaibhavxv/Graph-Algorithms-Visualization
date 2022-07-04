@@ -1,12 +1,17 @@
 const rightPanel = document.getElementById("right-panel");
-const console = document.getElementById("console");
+const consoleElement = document.getElementById("console");
 
 function addTextToConsole(text) {
-    console.insertAdjacentHTML("afterBegin", `<p class="text-warning m-0"><span class="text-light">-></span> ${text}</p>`);
+    consoleElement.insertAdjacentHTML("beforeEnd", `<p class="text-warning m-0"><span class="text-light">-></span> ${text}</p>`);
+    consoleElement.scrollTo(0, consoleElement.offsetHeight);
 }
 
 function clearConsole() {
-    console.innerHTML = "";
+    consoleElement.innerHTML = "";
+}
+
+function getNodeLabel(index) {
+    return data.nodes[index].label;
 }
 
 let data = {
@@ -99,6 +104,10 @@ let config = {
     }
 };
 
+function arrayToString(order) {
+    return "[" + order.join(", ") + "]";
+}
+
 const dfsButton = document.getElementById("dfsButton");
 const bfsButton = document.getElementById("bfsButton");
 const mstpButton = document.getElementById("mstpButton");
@@ -110,33 +119,63 @@ let graph = new G6.Graph(config);
 graph.data(data);
 graph.render();
 
-dfsButton.onclick = () => {
+dfsButton.onclick = async () => {
+    clearConsole();
     resetGraph();
-    dfs(0, nodes, visited, g);
+    let order = [];
+
+    for (let i = 0; i < v; i++) {
+        if (!visited[i]) {
+            addTextToConsole(`starting depth first traversal from ${getNodeLabel(i)} node`);
+            await dfs(i, order);
+        }
+    };
+
+    order = order.map(getNodeLabel);
+    addTextToConsole("Traversal Order: " + arrayToString(order));
 }
 
-bfsButton.onclick = () => {
+bfsButton.onclick = async () => {
+    clearConsole();
     resetGraph();
-    bfs(0);
+    let order = [];
+
+    for (let i = 0; i < v; i++) {
+        if (!visited[i]) {
+            addTextToConsole(`starting breadth first traversal from ${getNodeLabel(i)} node`);
+            await bfs(i, order);
+        }
+    };
+
+    order = order.map(getNodeLabel);
+    addTextToConsole("Traversal Order: " + arrayToString(order));
 }
 
 mstkButton.onclick = () => {
+    clearConsole();
     resetGraph();
+    addTextToConsole(`starting kruskal's algorithm to find a minimum spanning tree`);
     kruskalsMST();
 }
 
 mstpButton.onclick = () => {
+    clearConsole();
     resetGraph();
+    addTextToConsole(`starting prim's algorithm to find a minimum spanning tree`);
     primsMST();
 }
 
 bfButton.onclick = () => {
+    clearConsole();
     resetGraph();
+    addTextToConsole(`starting bellmon ford's algorithm for ${getNodeLabel(0)} node to find single source shortest path`);
     bellmonFord();
 }
 
 fwButton.onclick = () => {
+    clearConsole();
     resetGraph();
+    addTextToConsole(`starting floyd warshall's algorithm to find all pairs shortest path`);
     floydWarshall();
 }
 
@@ -192,8 +231,10 @@ function resetGraph() {
         visited[i] = false;
 }
 
-async function dfs(at) {
+async function dfs(at, order) {
     visited[at] = true;
+    addTextToConsole(`visiting node ${getNodeLabel(at)}`);
+    order.push(at);
     markNodeVisiting(at);
     await delay(delayValue);
 
@@ -205,7 +246,9 @@ async function dfs(at) {
         await delay(delayValue);
 
         if (!visited[to]) {
-            await dfs(to);
+            await dfs(to, order);
+        } else {
+            addTextToConsole(`${getNodeLabel(to)} already visited`);
         }
 
         markEdgeVisited(edgeIndex);
@@ -216,14 +259,16 @@ async function dfs(at) {
     await delay(delayValue);
 }
 
-async function bfs(start = 0) {
+async function bfs(start = 0, order) {
     var queue = [[0]];
     visited[start] = true;
     
     while (queue.length != 0) {
         let [at] = queue.shift();
+        order.push(at);
         markNodeVisiting(at);
         await delay(delayValue);
+        addTextToConsole(`visiting node ${getNodeLabel(at)}`);
 
         for (let i = 0; i < g[at].length; i++) {
             let to = g[at][i][0];
@@ -235,6 +280,8 @@ async function bfs(start = 0) {
             if (!visited[to]) {
                 visited[to] = true;
                 queue.push([to]);
+            } else {
+                addTextToConsole(`${getNodeLabel(to)} already visited`);
             }
         }
     }
@@ -322,12 +369,15 @@ async function primsMST() {
             }
         }
     }
+
+    addTextToConsole("MST Cost: " + totalCost);
 }
 
 async function kruskalsMST() {
     let parent = new Array(v);
     let sizes = new Array(v).fill(1);
     let edgeListCopy = [...edgeList];
+    let totalCost = 0;
     edgeListCopy.sort((a, b) => a[2] - b[2]);
 
     for (let i = 0; i < parent.length; i++)
@@ -368,6 +418,7 @@ async function kruskalsMST() {
         if (verdict) {
             markEdgeSelected(edgeIndex);
             await delay(delayValue);
+            totalCost += w;
 
             if (!nodes[u].hasState("select")) {
                 markNodeSelected(u);
@@ -383,6 +434,8 @@ async function kruskalsMST() {
             await delay(delayValue);
         }
     }
+
+    addTextToConsole("MST Cost: " + totalCost);
 }
 
 async function bellmonFord(at = 0) {
@@ -396,7 +449,7 @@ async function bellmonFord(at = 0) {
 
     distance[at] = 0; 
     parent[at] = [-1, -1]; // parent, edge-index
-
+    
     for (let j = 0; j < v; j++) {
         for (let i = 0; i < edgeList.length; i++) {
             let [u, to, w, edgeIndex] = edgeList[i];
@@ -406,6 +459,12 @@ async function bellmonFord(at = 0) {
                 parent[to] = [u, edgeIndex];
             }
         }
+    }
+
+    addTextToConsole(`distances to reach nodes from ${getNodeLabel(at)} node`);
+
+    for (let i = 0; i < v; i++) {
+        addTextToConsole(`${getNodeLabel(i)}: ${distance[i] == Math.MAX_VALUE ? "∞" : distance[i]} units`);
     }
 }
 
@@ -425,6 +484,14 @@ async function floydWarshall() {
                     }
                 }
             }
+        }
+    }
+
+    for (let i = 0; i < v; i++) {
+        addTextToConsole(`distances to reach nodes from ${getNodeLabel(i)} node`);
+
+        for (let j = 0; j < v; j++) {
+            addTextToConsole(`${getNodeLabel(j)}: ${matrix[i][j][0] == -1 ? "∞" : matrix[i][j][0]} units`);
         }
     }
 }
