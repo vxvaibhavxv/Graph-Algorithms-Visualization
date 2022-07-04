@@ -17,6 +17,8 @@ Currently, this application supports following algorithms.
     * Bellmon Ford
 * All Pairs Shortest Paths
     * Floyd Warshall
+* Strongly Connected Components
+    * Tarjan's Algorithm
 * Articulation Points
     * DFS
 * Bridges
