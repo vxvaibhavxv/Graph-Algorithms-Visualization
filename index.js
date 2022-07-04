@@ -1,4 +1,13 @@
 const rightPanel = document.getElementById("right-panel");
+const console = document.getElementById("console");
+
+function addTextToConsole(text) {
+    console.insertAdjacentHTML("afterBegin", `<p class="text-warning m-0"><span class="text-light">-></span> ${text}</p>`);
+}
+
+function clearConsole() {
+    console.innerHTML = "";
+}
 
 let data = {
     nodes: [
@@ -24,18 +33,17 @@ let data = {
     ]
 };
 
-let graphWidth = rightPanel.offsetWidth;
-let graphHeight = rightPanel.offsetHeight;
+let graphWidth = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
+let graphHeight = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
 
 let config = {
-    container: "right-panel",
+    container: "mountNode",
     width: graphWidth,
     height: graphHeight,
     layout: {
-        type: 'forceAtlas2',
-        center: [graphWidth / 2, graphHeight / 2],
-        width: graphWidth,
-        height: graphHeight,
+        type: "force",
+        linkDistance: 250,
+        // nodeStrength: -2000, // to be decided
         preventOverlap: true,
     },
     defaultNode: {
