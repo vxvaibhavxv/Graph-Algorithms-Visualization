@@ -25,7 +25,7 @@
     </nav>
     <div class="container-fluid">
         <div class="row" style="height: calc(100vh - 65px);">
-            <div class="col border p-3" id="left-panel">
+            <div class="col border-end p-3" id="left-panel">
                 <div class="row">
                     <div class="btn-group w-100">
                         <button type="button" class="btn btn-dark">Generate Graph</button>
@@ -101,15 +101,15 @@
                                     <td colspan="5" class="table-primary">Strongly Connected Components</td>
                                 </tr>
                                 <tr>
-                                    <td id="tjButton" style="cursor: pointer;" class="table-active"><u>Tarjan's Algorithm</u></td>
+                                    <td id="tjButton" style="cursor: pointer;" class="table-active"><u>Kosaraju's Algorithm</u></td>
                                     <td>O()</td>
                                     <td>O()</td>
                                     <td>All</td>
                                 </tr>
                                 <tr>
-                                    <td id="" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
-                                    <td>O()</td>
-                                    <td>O()</td>
+                                    <td id="dfssccButton" style="cursor: pointer;" class="table-active"><u>Tarjan's Algorithm</u></td>
+                                    <td>O(V + E)</td>
+                                    <td>O(V)</td>
                                     <td>All</td>
                                 </tr>
                                 <tr>
@@ -146,7 +146,7 @@
                                     <td>Undirected</td>
                                 </tr>
                                 <tr>
-                                    <td id="" style="cursor: pointer;" class="table-active"><u>Kosaraju's Algorithm</u></td>
+                                    <td id="" style="cursor: pointer;" class="table-active"><u>Kahn's Algorithm</u></td>
                                     <td>O()</td>
                                     <td>O()</td>
                                     <td>Undirected</td>

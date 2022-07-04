@@ -10,6 +10,10 @@ function clearConsole() {
     consoleElement.innerHTML = "";
 }
 
+function randomHEXColour() {
+    return '#' + Math.random().toString(16).slice(-6);
+}
+
 function getNodeLabel(index) {
     return data.nodes[index].label;
 }
@@ -116,6 +120,7 @@ const bfButton = document.getElementById("bfButton");
 const fwButton = document.getElementById("fwButton");
 const dfsapButton = document.getElementById("dfsapButton");
 const dfsbButton = document.getElementById("dfsbButton");
+const dfssccButton = document.getElementById("dfssccButton");
 
 let graph = new G6.Graph(config);
 graph.data(data);
@@ -181,11 +186,39 @@ fwButton.onclick = () => {
     floydWarshall();
 }
 
+dfssccButton.onclick = async () => {
+    clearConsole();
+    resetGraph();
+    let points = [];
+    let ids = new Array(v).fill(-1), lowLinks = new Array(v).fill(-1), onStack = new Array(v).fill(false);
+    let recursionStack = [];
+    let counter = {
+        id: 0
+    };
+
+    for (let i = 0; i < v; i++) {
+        if (!visited[i]) {
+            addTextToConsole(`starting depth first traversal from ${getNodeLabel(i)} node to find articulation points`);
+            await sccDFS(i, points, ids, lowLinks, counter, recursionStack, onStack);
+        }
+    };
+
+    addTextToConsole(`following are the strongly connected components found`);
+
+    if (points.length == 0) {
+        addTextToConsole(`no strongly connected components found`);
+    } else {
+        points.forEach((scc, index) => {
+            addTextToConsole(arrayToString(scc));
+        });
+    }
+}
+
 dfsapButton.onclick = async () => {
     clearConsole();
     resetGraph();
     let points = [];
-    let ids = [], lowLinks = [];
+    let ids = new Array(v).fill(-1), lowLinks = new Array(v).fill(-1);
     let counter = {
         id: 0
     };
@@ -212,7 +245,7 @@ dfsbButton.onclick = async () => {
     clearConsole();
     resetGraph();
     let bridges = [];
-    let ids = [], lowLinks = [];
+    let ids = new Array(v).fill(-1), lowLinks = new Array(v).fill(-1);
     let counter = {
         id: 0
     };
@@ -287,14 +320,77 @@ let delayValue = 100;
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 function resetGraph() {
-    for (let i = 0; i < nodes.length; i++)
+    for (let i = 0; i < nodes.length; i++) {
         graph.clearItemStates(nodes[i]);
+        graph.updateItem(nodes[i], {
+            style: {
+                fill: "#58D68D"
+            }
+        });
+    }
 
-    for (let i = 0; i < edges.length; i++)
+    for (let i = 0; i < edges.length; i++) {
         graph.clearItemStates(edges[i]);
+        graph.updateItem(edges[i], {
+            style: {
+                stroke: "black"
+            }
+        });
+    }
 
     for (let i = 0; i < visited.length; i++)
         visited[i] = false;
+}
+
+async function sccDFS(at, points, ids, lowLinks, counter, recursionStack, onStack) {
+    ids[at] = counter.id;
+    lowLinks[at] = counter.id;
+    visited[at] = true;
+    onStack[at] = true;
+    recursionStack.push(at);
+    counter.id++;
+    markNodeVisiting(at);
+    await delay(delayValue);
+
+    for (let i = 0; i < g[at].length; i++) {
+        let [to, w, edgeIndex] = g[at][i];
+        markEdgeVisiting(edgeIndex);
+        await delay(delayValue);
+
+        if (!visited[to]) {
+            await sccDFS(to, points, ids, lowLinks, counter, recursionStack, onStack);
+            // lowLinks[at] = Math.min(lowLinks[at], lowLinks[to]);
+        }
+        
+        if (onStack[to]) {
+            lowLinks[at] = Math.min(lowLinks[at], lowLinks[to]);
+        }
+
+        markEdgeVisited(edgeIndex);
+            await delay(delayValue);
+    }
+
+    if (ids[at] == lowLinks[at]) {
+        let scc = [];
+        let colour = randomHEXColour();
+
+        while (recursionStack.length != 0) {
+            let item = recursionStack.pop();
+            onStack[item] = false;
+            lowLinks[item] = at;
+            scc.push(item);
+            markNodeSelectedWithColour(item, colour);
+            await delay(delayValue);
+
+            if (item == at)
+                break;
+        }
+
+        points.push(scc);
+    } else {
+        markNodeVisited(at);
+        await delay(delayValue);
+    }
 }
 
 async function bridgesDFS(at, parent, bridges, ids, lowLinks, counter) {
@@ -693,6 +789,26 @@ function markNodeVisited(at) {
 function markNodeSelected(at) {
     graph.clearItemStates(nodes[at]);
     graph.setItemState(nodes[at], "select", true);
+    return;
+}
+
+function markNodeSelectedWithColour(at, colour) {
+    graph.clearItemStates(nodes[at]);
+    graph.updateItem(nodes[at], {
+        style: {
+            fill: colour
+        }
+    });
+    return;
+}
+
+function markNodeSelectedWithRandomColour(at) {
+    graph.clearItemStates(nodes[at]);
+    graph.updateItem(nodes[at], {
+        style: {
+            fill: randomHEXColour()
+        }
+    });
     return;
 }
 
