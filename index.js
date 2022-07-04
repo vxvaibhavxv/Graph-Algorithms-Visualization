@@ -1,5 +1,12 @@
 const rightPanel = document.getElementById("right-panel");
 const consoleElement = document.getElementById("console");
+const animationSpeed = document.getElementById("animationSpeed");
+const animationSpeedText = document.getElementById("animationSpeedText");
+
+animationSpeed.oninput = () => {
+    delayValue = animationSpeed.value;
+    animationSpeedText.innerHTML = delayValue;
+}
 
 function addTextToConsole(text) {
     consoleElement.insertAdjacentHTML("beforeEnd", `<p class="text-warning m-0"><span class="text-light">-></span> ${text}</p>`);

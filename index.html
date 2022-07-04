@@ -19,7 +19,8 @@
         <div class="container-fluid">
             <div class="d-flex align-items-center justify-content-between w-100">
                 <a class="navbar-brand" href=".">Graph Algorithms Visualiser</a>
-                <p class="m-0 fw-bold">Made By: <a class="" href="https://www.linkedin.com/in/itsmrvaibhav/" target="_blank">Vaibhav</a></p>
+                <p class="m-0 fw-bold">Made By: <a class="" href="https://www.linkedin.com/in/itsmrvaibhav/"
+                        target="_blank">Vaibhav</a></p>
             </div>
         </div>
     </nav>
@@ -27,9 +28,50 @@
         <div class="row" style="height: calc(100vh - 65px);">
             <div class="col border-end p-3" id="left-panel">
                 <div class="row">
-                    <div class="btn-group w-100">
-                        <button type="button" class="btn btn-dark">Generate Graph</button>
-                        <button type="button" class="btn btn-danger">Stop</button>
+                    <div class="w-100 d-flex">
+                        <div class="me-2">
+                            <button type="button" class="btn btn-dark" style="white-space: nowrap;">New Graph</button>
+                        </div>
+                        <div class="me-2">
+                            <button type="button" class="btn btn-dark" style="white-space: nowrap;" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Custom Input</button>
+                            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+                                data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="staticBackdropLabel">Custom Input</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="alert alert-warning" role="alert">
+                                                <p class="m-0 fs-6">> First line: 2 space-separated numbers representing number of nodes (v) and edges (e)</p>
+                                                <p class="m-0 fs-6">> Next e lines: 3 space-seperated integer representing edge start, edge end, and edge weight</p>
+                                                <p class="m-0 fs-6">> Follow 0-based indexing for nodes</p>
+                                            </div>
+                                            <textarea class="form-control" name="" rows="10" style="resize: none;" placeholder="Example:
+3 4
+0 1 4
+1 2 5
+2 3 17
+1 3 10
+                                            "></textarea>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">Create Graph</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="me-2 bg-light rounded ps-3 pe-3 d-flex align-items-center justify-content-center"
+                            style="width: 100%; max-width: 100%;">
+                            <p class="m-0 me-3">Speed</p>
+                            <input type="range" class="form-range" id="animationSpeed" min="50" max="3000" step="100"
+                                value="500">
+                            <p class="m-0 ms-3" id="animationSpeedText">500</p>
+                        </div>
                     </div>
                     <div class="w-100"></div>
                     <div class="mt-3" style="height: 300px; overflow: none; overflow-y: auto;">
@@ -47,13 +89,15 @@
                                     <td colspan="5" class="table-primary">Graph Traversal</td>
                                 </tr>
                                 <tr>
-                                    <td id="dfsButton" style="cursor: pointer;" class="table-active"><u>Depth First Traversal</u></td>
+                                    <td id="dfsButton" style="cursor: pointer;" class="table-active"><u>Depth First
+                                            Traversal</u></td>
                                     <td>O(V + E)</td>
                                     <td>O(V)</td>
                                     <td>All</td>
                                 </tr>
                                 <tr>
-                                    <td id="bfsButton" style="cursor: pointer;" class="table-active"><u>Breadth First Traversal</u></td>
+                                    <td id="bfsButton" style="cursor: pointer;" class="table-active"><u>Breadth First
+                                            Traversal</u></td>
                                     <td>O(V + E)</td>
                                     <td>O(V)</td>
                                     <td>All</td>
@@ -62,13 +106,15 @@
                                     <td colspan="5" class="table-primary">Minimum Spanning Tree</td>
                                 </tr>
                                 <tr>
-                                    <td id="mstpButton" style="cursor: pointer;" class="table-active"><u>Prim's Algorithm</u></td>
+                                    <td id="mstpButton" style="cursor: pointer;" class="table-active"><u>Prim's
+                                            Algorithm</u></td>
                                     <td>O((V + E) * log (V))</td>
                                     <td>O(V)</td>
                                     <td>Undirected Weighted</td>
                                 </tr>
                                 <tr>
-                                    <td id="mstkButton" style="cursor: pointer;" class="table-active"><u>Kruskal's Algorithm</u></td>
+                                    <td id="mstkButton" style="cursor: pointer;" class="table-active"><u>Kruskal's
+                                            Algorithm</u></td>
                                     <td>O(E * log (E))</td>
                                     <td>O(V)</td>
                                     <td>Undirected Weighted</td>
@@ -77,13 +123,15 @@
                                     <td colspan="5" class="table-primary">Single Source Shortest Path</td>
                                 </tr>
                                 <tr>
-                                    <td id="djButton" style="cursor: pointer;" class="table-active"><u>Dijkstra’s Algorithm</u></td>
+                                    <td id="djButton" style="cursor: pointer;" class="table-active"><u>Dijkstra’s
+                                            Algorithm</u></td>
                                     <td>O((V + E) * log E))</td>
                                     <td>O(V + E)</td>
                                     <td>Undirected Weighted</td>
                                 </tr>
                                 <tr>
-                                    <td id="bfButton" style="cursor: pointer;" class="table-active"><u>Bellmon Ford</u></td>
+                                    <td id="bfButton" style="cursor: pointer;" class="table-active"><u>Bellmon Ford</u>
+                                    </td>
                                     <td>O(V * E)</td>
                                     <td>O(V)</td>
                                     <td>Undirected Weighted</td>
@@ -92,7 +140,8 @@
                                     <td colspan="5" class="table-primary">All Pairs Shortest Paths</td>
                                 </tr>
                                 <tr>
-                                    <td id="fwButton" style="cursor: pointer;" class="table-active"><u>Floyd Warshall</u></td>
+                                    <td id="fwButton" style="cursor: pointer;" class="table-active"><u>Floyd
+                                            Warshall</u></td>
                                     <td>O(V<sup>3</sup>)</td>
                                     <td>O(V<sup>2</sup>)</td>
                                     <td>Undirected Weighted</td>
@@ -101,13 +150,15 @@
                                     <td colspan="5" class="table-primary">Strongly Connected Components</td>
                                 </tr>
                                 <tr>
-                                    <td id="tjButton" style="cursor: pointer;" class="table-active"><u>Kosaraju's Algorithm</u></td>
+                                    <td id="tjButton" style="cursor: pointer;" class="table-active"><u>Kosaraju's
+                                            Algorithm</u></td>
                                     <td>O()</td>
                                     <td>O()</td>
                                     <td>All</td>
                                 </tr>
                                 <tr>
-                                    <td id="dfssccButton" style="cursor: pointer;" class="table-active"><u>Tarjan's Algorithm</u></td>
+                                    <td id="dfssccButton" style="cursor: pointer;" class="table-active"><u>Tarjan's
+                                            Algorithm</u></td>
                                     <td>O(V + E)</td>
                                     <td>O(V)</td>
                                     <td>All</td>
@@ -156,8 +207,9 @@
                     </div>
                     <div class="w-100"></div>
                     <div class="mt-3">
-                        <div class="bg-dark p-3" id="console" style="height: calc(100vh - 470px); overflow: none; overflow-y: scroll;">
-                            
+                        <div class="bg-dark p-3" id="console"
+                            style="height: calc(100vh - 470px); overflow: none; overflow-y: scroll;">
+
                         </div>
                     </div>
                 </div>
