@@ -31,7 +31,7 @@ let config = {
     layout: {
         type: "force",
         linkDistance: 250,
-        // nodeStrength: -2000, // to be decided
+        nodeStrength: -150, // to be decided
         preventOverlap: true,
     },
     defaultNode: {
