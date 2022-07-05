@@ -30,7 +30,7 @@
                 <div class="row">
                     <div class="w-100 d-flex">
                         <div class="me-2">
-                            <button type="button" class="btn btn-dark" style="white-space: nowrap;">New Graph</button>
+                            <button type="button" class="btn btn-dark" style="white-space: nowrap;" id="newRandomGraphButton">New Graph</button>
                         </div>
                         <div class="me-2">
                             <button type="button" class="btn btn-dark" style="white-space: nowrap;" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Custom Input</button>
@@ -123,39 +123,36 @@
                                     <td colspan="5" class="table-primary">Single Source Shortest Path</td>
                                 </tr>
                                 <tr>
-                                    <td id="djButton" style="cursor: pointer;" class="table-active"><u>Dijkstra’s
-                                            Algorithm</u></td>
+                                    <td id="djButton" style="cursor: pointer;" class="table-active"><u>Dijkstra’s Algorithm</u></td>
                                     <td>O((V + E) * log E))</td>
                                     <td>O(V + E)</td>
-                                    <td>Undirected Weighted</td>
+                                    <td>Directed Weighted</td>
                                 </tr>
                                 <tr>
                                     <td id="bfButton" style="cursor: pointer;" class="table-active"><u>Bellmon Ford</u>
                                     </td>
                                     <td>O(V * E)</td>
                                     <td>O(V)</td>
-                                    <td>Undirected Weighted</td>
+                                    <td>Directed Weighted</td>
                                 </tr>
                                 <tr>
                                     <td colspan="5" class="table-primary">All Pairs Shortest Paths</td>
                                 </tr>
                                 <tr>
-                                    <td id="fwButton" style="cursor: pointer;" class="table-active"><u>Floyd
-                                            Warshall</u></td>
+                                    <td id="fwButton" style="cursor: pointer;" class="table-active"><u>Floyd Warshall</u></td>
                                     <td>O(V<sup>3</sup>)</td>
                                     <td>O(V<sup>2</sup>)</td>
-                                    <td>Undirected Weighted</td>
+                                    <td>Directed Weighted</td>
                                 </tr>
                                 <tr>
                                     <td colspan="5" class="table-primary">Strongly Connected Components</td>
                                 </tr>
 
                                 <tr>
-                                    <td id="dfssccButton" style="cursor: pointer;" class="table-active"><u>Tarjan's
-                                            Algorithm</u></td>
+                                    <td id="dfssccButton" style="cursor: pointer;" class="table-active"><u>Tarjan's Algorithm</u></td>
                                     <td>O(V + E)</td>
                                     <td>O(V)</td>
-                                    <td>All</td>
+                                    <td>Directed</td>
                                 </tr>
                                 <tr>
                                     <td colspan="5" class="table-primary">Articulation Points / Cut Vertices</td>
@@ -164,7 +161,7 @@
                                     <td id="dfsapButton" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
                                     <td>O(V + E)</td>
                                     <td>O(V)</td>
-                                    <td>All</td>
+                                    <td>Undirected</td>
                                 </tr>
                                 <tr>
                                     <td colspan="5" class="table-primary">Bridges / Cut Edges</td>
@@ -173,22 +170,22 @@
                                     <td id="dfsbButton" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
                                     <td>O(V + E)</td>
                                     <td>O(V)</td>
-                                    <td>All</td>
+                                    <td>Undirected</td>
                                 </tr>
                                 <tr>
                                     <td colspan="5" class="table-primary">Cycle Detection</td>
                                 </tr>
                                 <tr>
                                     <td id="dfscdButton" style="cursor: pointer;" class="table-active"><u>DFS</u></td>
-                                    <td>O()</td>
-                                    <td>O()</td>
+                                    <td>O(V + E)</td>
+                                    <td>O(V)</td>
                                     <td>Directed</td>
                                 </tr>
                                 <tr>
                                     <td id="kncdButton" style="cursor: pointer;" class="table-active"><u>Kahn's Algorithm</u></td>
-                                    <td>O()</td>
-                                    <td>O()</td>
-                                    <td>Undirected</td>
+                                    <td> O(V + E)</td>
+                                    <td> O(V)</td>
+                                    <td>Directed</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -212,6 +209,7 @@
     integrity="sha512-td8ZvEZVG5Fd1BO6VjJ70EF0qnanOQH8vUjE5qu96LNfeOtwZ3svxJZ7XpcYSDStNcFi2p4NA28WNrKHS9ngsw=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./random-graphs.js"></script>
 <script src="./index.js"></script>
 
 </html>

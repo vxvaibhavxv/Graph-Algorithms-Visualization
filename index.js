@@ -4,84 +4,21 @@ const animationSpeed = document.getElementById("animationSpeed");
 const animationSpeedText = document.getElementById("animationSpeedText");
 const customGraphButton = document.getElementById("customGraphButton");
 const customGraphInputInput = document.getElementById("customGraphInputInput");
+const newRandomGraphButton = document.getElementById("newRandomGraphButton");
 
-let directedGraph = {
-    0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
-    1: [[5, 18, 3], [6, 25, 4]],
-    2: [[4, 40, 5]],
-    3: [[2, 10, 6], [4, 12, 7]],
-    4: [[1, 42, 8]],
-    5: [],
-    6: [[4, 23, 9]],
-};
+function buildRandomGraph() {
+    let index = Math.floor(Math.random() * randomGraphs.length);
+    let copy = [...randomGraphs[index]]
+    buildGraphs(copy);
+}
 
-let undirectedGraph = {
-    0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
-    1: [[0, 3, 0], [5, 18, 3], [6, 25, 4], [4, 42, 8]],
-    2: [[4, 40, 5], [0, 6, 1], [3, 10, 6]],
-    3: [[2, 10, 6], [4, 12, 7], [0, 16, 2]],
-    4: [[1, 42, 8], [2, 40, 5], [3, 12, 7], [6, 23, 9]],
-    5: [[1, 18, 3]],
-    6: [[4, 23, 9], [1, 25, 4]]
-};
-
-// from to weight edge-index
-let edgeList = [
-    [0, 1, 3, 0],
-    [0, 2, 6, 1],
-    [0, 3, 16, 2],
-    [1, 5, 18, 3],
-    [1, 6, 25, 4],
-    [2, 4, 40, 5],
-    [3, 2, 10, 6],
-    [3, 4, 12, 7],
-    [4, 1, 42, 8],
-    [6, 4, 23, 9],
-]
-
-let directedGraphMatrix = [
-    [[-1, -1], [3, 0], [6, 1], [16, 2], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [18, 3], [25, 4],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [40, 5], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [10, 6], [-1, -1], [12, 7], [-1, -1], [-1, -1],],
-    [[-1, -1], [42, 8], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [23, 9], [-1, -1], [-1, -1],]
-];
-
-let undirectedGraphMatrix = [
-    [[-1, -1], [3, 0], [6, 1], [16, 2], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [18, 3], [25, 4],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [40, 5], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [10, 6], [-1, -1], [12, 7], [-1, -1], [-1, -1],],
-    [[-1, -1], [42, 8], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [23, 9], [-1, -1], [-1, -1],]
-];
-
-let data = {
-    nodes: [
-        { id: "node0", label: "A" },
-        { id: "node1", label: "B" },
-        { id: "node2", label: "C" },
-        { id: "node3", label: "D" },
-        { id: "node4", label: "E" },
-        { id: "node5", label: "F" },
-        { id: "node6", label: "G" }
-    ],
-    edges: [
-        { source: "node0", target: "node1", "label": "3" },
-        { source: "node0", target: "node2", "label": "6" },
-        { source: "node0", target: "node3", "label": "16" },
-        { source: "node1", target: "node5", "label": "18" },
-        { source: "node1", target: "node6", "label": "25" },
-        { source: "node2", target: "node4", "label": "40" },
-        { source: "node3", target: "node2", "label": "10" },
-        { source: "node3", target: "node4", "label": "12" },
-        { source: "node4", target: "node1", "label": "42" },
-        { source: "node6", target: "node4", "label": "23" },
-    ]
-};
+let directedGraph = {};
+let undirectedGraph = {};
+let edgeList = []
+let directedGraphMatrix = [];
+let undirectedGraphMatrix = [];
+let data = {};
+let lastRandomGraphIndex = -1;
 
 // let graphWidth = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
 // let graphHeight = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
@@ -170,13 +107,14 @@ function loadWelcomeConsoleText() {
     addTextToConsole(`Click on any algorithm's name under the ${wrapWith("Name")} column to run that algorithm over the loaded graph`);
 }
 
-let v = 7, e = 10;
-let visited = new Array(v).fill(false);
+let v, e;
+let visited = [];
 let graph = new G6.Graph(config);
 graph.data(data);
 graph.render();
 let nodes = graph.getNodes();
 let edges = graph.getEdges();
+buildRandomGraph();
 let delayValue = 100;
 loadWelcomeConsoleText();
 
@@ -244,7 +182,7 @@ function buildGraphs(inputEdges) {
     directedGraphMatrix = dm; // directed graph matrix created
     undirectedGraphMatrix = udm; // undirected graph matrix created
     data = inputData;
-    printAllGraphs();
+    // printAllGraphs();
     resetGraphData();
     addTextToConsole("new graph created using custom input successfully!")
 }
@@ -262,6 +200,10 @@ function printAllGraphs() {
     console.log(directedGraphMatrix);
     console.log(undirectedGraphMatrix);
     console.log(data);
+}
+
+newRandomGraphButton.onclick = () => {
+    buildRandomGraph();
 }
 
 customGraphButton.onclick = () => {
