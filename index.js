@@ -171,8 +171,8 @@ function buildGraphs(inputEdges) {
         udg[src].push([dest, weight, edgeIndex]);
         udg[dest].push([src, weight, edgeIndex]);
         dm[src][dest] = [weight, edgeIndex];
-        // udm[src][dest] = [weight, edgeIndex];
-        // udm[dest][src] = [weight, edgeIndex];
+        // udm[src][dest] = [weight, edgeIndex]; 
+        // udm[dest][src] = [weight, edgeIndex]; 
         inputData.edges.push({
             source: `node${src}`,
             target: `node${dest}`,
@@ -801,7 +801,7 @@ async function dfs(at, order) {
 }
 
 async function bfs(start = 0, order) {
-    var queue = [[0]];
+    var queue = [[start]];
     visited[start] = true;
     
     while (queue.length != 0) {
