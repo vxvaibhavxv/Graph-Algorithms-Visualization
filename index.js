@@ -165,6 +165,7 @@ function loadWelcomeConsoleText() {
     addTextToConsole(`Use the ${wrapWith("Custom Input")} button to enter a custom graph; do follow the input guidelines :)`);
     addTextToConsole(`Use the ${wrapWith("Speed")} slider to change the animation speed`);
     addTextToConsole(`${wrapWith("Click & Drag")} the graph to move it around`);
+    addTextToConsole(`${wrapWith("Scroll")} over the graph to zoom`);
     addTextToConsole(`${wrapWith("Click & Drag")} any node to move to around at your will`);
     addTextToConsole(`Click on any algorithm's name under the ${wrapWith("Name")} column to run that algorithm over the loaded graph`);
 }
@@ -187,8 +188,18 @@ function buildGraphs(inputEdges) {
     visited = new Array(v).fill(false); // visited array created
     edgeList = inputEdges; // edge list created
     let dg = {}, udg = {}, inputData = {nodes: [], edges: []};
-    let dm = new Array(v).fill(new Array(v).fill([-1, -1]));
-    let udm = new Array(v).fill(new Array(v).fill([-1, -1]));
+    let dm = [];
+    let udm = [];
+
+    for (let i = 0; i < v; i++) {
+        dm.push([]);
+        udm.push([]);
+
+        for (let j = 0; j < v; j++) {
+            dm[i].push([-1, -1]);
+            udm[i].push([-1, -1]);
+        }
+    }
 
     for (let i = 0; i < e; i++) {
         let [src, dest, weight, edgeIndex] = inputEdges[i];
@@ -219,8 +230,8 @@ function buildGraphs(inputEdges) {
         udg[src].push([dest, weight, edgeIndex]);
         udg[dest].push([src, weight, edgeIndex]);
         dm[src][dest] = [weight, edgeIndex];
-        udm[src][dest] = [weight, edgeIndex];
-        udm[dest][src] = [weight, edgeIndex];
+        // udm[src][dest] = [weight, edgeIndex];
+        // udm[dest][src] = [weight, edgeIndex];
         inputData.edges.push({
             source: `node${src}`,
             target: `node${dest}`,
@@ -233,7 +244,7 @@ function buildGraphs(inputEdges) {
     directedGraphMatrix = dm; // directed graph matrix created
     undirectedGraphMatrix = udm; // undirected graph matrix created
     data = inputData;
-    // printAllGraphs();
+    printAllGraphs();
     resetGraphData();
     addTextToConsole("new graph created using custom input successfully!")
 }
@@ -262,7 +273,6 @@ customGraphButton.onclick = () => {
     }
 
     let parts = string.split(/\n/);
-    console.log(parts);
     
     for (let i = 0; i < parts.length; i++) {
         parts[i] = parts[i].split(' ').map((x) => isNaN(x) ? NaN : Number(x));
@@ -271,7 +281,6 @@ customGraphButton.onclick = () => {
 
     for (let i = 0; i < parts.length; i++) {
         for (let j = 0; j < parts[i].length; j++) {
-        console.log(parts[i][j]);
             if (isNaN(parts[i][j])) {
                 addTextToConsole("error: non-digit input found");
                 return;
@@ -367,8 +376,15 @@ mstpButton.onclick = () => {
 bfButton.onclick = () => {
     clearConsole();
     resetGraph();
-    addTextToConsole(`starting bellmon ford's algorithm for ${getNodeLabel(0)} node to find single source shortest path`);
+    addTextToConsole(`starting bellmon ford's algorithm from ${getNodeLabel(0)} node to find single source shortest path`);
     bellmonFord();
+}
+
+djButton.onclick = () => {
+    clearConsole();
+    resetGraph();
+    addTextToConsole(`starting dijkstra's algorithm from ${getNodeLabel(0)} node to find single source shortest path`);
+    dijkstra();
 }
 
 fwButton.onclick = () => {
@@ -536,6 +552,69 @@ async function sccDFS(at, points, ids, lowLinks, counter, recursionStack, onStac
     }
 }
 
+async function dijkstra(at = 0) {
+    function minimum(visited, distance) {
+        let counter = 0;
+        let min = -1;
+        
+        while (counter != visited.length) {
+            if (min == -1 && !visited[counter]) {
+                min = counter;
+            } else {
+                if (!visited[counter] && distance[min][0] > distance[counter][0]) {
+                    min = counter;
+                }
+            }
+            
+            counter++;
+        }
+        
+        return min;
+    }
+
+    let distance = new Array(v).fill([Number.MAX_VALUE, -1]);
+    distance[at] = [0, -1];
+    let count = 0;
+    // markAllEdgesVisited();
+
+    while (count != v) {
+        let min = minimum(visited, distance); // Minimum non-visited node
+        visited[min] = true;
+        markNodeSelected(min);
+        await delay(delayValue);
+        count++;
+        
+        for (let i = 0; i < directedGraph[min].length; i++) {
+            let [to, w, edgeIndex] = directedGraph[min][i];
+            let newValue = distance[min][0] + w;
+            markEdgeVisiting(edgeIndex);
+            await delay(delayValue);
+            
+            if (distance[to][0] > newValue) {
+                let oldEdge = distance[to][1];
+
+                if (oldEdge !== -1) {
+                    markEdgeVisited(oldEdge);
+                    await delay(delayValue);    
+                }
+
+                distance[to] = [newValue, edgeIndex];
+                markEdgeSelected(edgeIndex);
+                await delay(delayValue);
+            } else {
+                markEdgeVisited(edgeIndex);
+                await delay(delayValue);
+            }
+        }
+    }
+    
+    addTextToConsole(`distances to reach nodes from ${getNodeLabel(at)} node`);
+
+    for (let i = 0; i < v; i++) {
+        addTextToConsole(`${getNodeLabel(i)}: ${distance[i][0] == Math.MAX_VALUE ? "∞" : distance[i][0]} units`);
+    }
+}
+
 async function bridgesDFS(at, parent, bridges, ids, lowLinks, counter) {
     ids[at] = counter.id;
     lowLinks[at] = counter.id;
@@ -685,7 +764,7 @@ async function primsMST() {
         let min = Number.MAX_VALUE, minIndex; 
     
         for (let i = 0; i < v; i++) {
-            if (mstSet[i] == false && distance[i][0] < min) {
+            if (mstSet[i] === false && distance[i][0] < min) {
                 min = distance[i][0];
                 minIndex = i; 
             }
@@ -694,16 +773,14 @@ async function primsMST() {
         return minIndex; 
     }
 
-    let parent = []; 
-    let distance = []; 
-    let mstSet = []; 
+    let parent = new Array(v).fill(-1); 
+    let distance = new Array(v).fill([Number.MAX_VALUE, -1]); 
+    let mstSet = new Array(v).fill(false); 
     let totalCost = 0;
     markAllEdgesVisited();
 
     for (let i = 0; i < v; i++) {
         parent[i] = i;
-        distance[i] = [Number.MAX_VALUE, -1];
-        mstSet[i] = false; 
     }
 
     distance[0] = [0, -1]; 
@@ -720,10 +797,6 @@ async function primsMST() {
 
     while (!allVisited()) {
         let at = minKey(distance, mstSet);
-
-        if (mstSet[at])
-            continue;
-
         mstSet[at] = true;
         totalCost += distance[at][0];
         
@@ -732,10 +805,10 @@ async function primsMST() {
             await delay(delayValue);
         }
 
-        for (let i = 0; i < undirectedGraph[at].length; i++) {
-            let to = undirectedGraph[at][i][0];
-            let w = undirectedGraph[at][i][1];
-            let edgeIndex = undirectedGraph[at][i][2];
+        for (let i = 0; i < directedGraph[at].length; i++) {
+            let to = directedGraph[at][i][0];
+            let w = directedGraph[at][i][1];
+            let edgeIndex = directedGraph[at][i][2];
             markEdgeVisiting(edgeIndex);
             await delay(delayValue);
 
@@ -744,7 +817,7 @@ async function primsMST() {
                 parent[to] = at;
                 distance[to] = [w, edgeIndex];
                 
-                if (lastEdgeIndex != -1) {
+                if (lastEdgeIndex !== -1) {
                     markEdgeVisited(lastEdgeIndex);
                     await delay(delayValue);
                 }
@@ -863,6 +936,10 @@ async function bellmonFord(at = 0) {
 
 async function floydWarshall() {
     let matrix = [...directedGraphMatrix];
+    console.log(matrix);
+
+    for (let i = 0; i < v; i++)
+        matrix[i][i][0] = 0;
 
     for (let k = 0; k < v; k++) {
         for (let i = 0; i < v; i++) {
