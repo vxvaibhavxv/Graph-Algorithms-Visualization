@@ -326,6 +326,8 @@ const fwButton = document.getElementById("fwButton");
 const dfsapButton = document.getElementById("dfsapButton");
 const dfsbButton = document.getElementById("dfsbButton");
 const dfssccButton = document.getElementById("dfssccButton");
+const dfscdButton = document.getElementById("dfscdButton");
+const kncdButton = document.getElementById("kncdButton");
 
 dfsButton.onclick = async () => {
     clearConsole();
@@ -363,6 +365,7 @@ mstkButton.onclick = () => {
     clearConsole();
     resetGraph();
     addTextToConsole(`starting kruskal's algorithm to find a minimum spanning tree`);
+    addTextToConsole(`considering the graph as undirected and weighted`);
     kruskalsMST();
 }
 
@@ -370,7 +373,39 @@ mstpButton.onclick = () => {
     clearConsole();
     resetGraph();
     addTextToConsole(`starting prim's algorithm to find a minimum spanning tree`);
+    addTextToConsole(`considering the graph as undirected and weighted`);
     primsMST();
+}
+
+dfscdButton.onclick = async () => {
+    clearConsole();
+    resetGraph();
+    addTextToConsole(`starting depth first traversal to detect a cycle`);
+    let state = new Array(v).fill(0);
+    let noCycleFound = false;
+
+    for (let i = 0; i < v; i++) {
+        if (state[i] == 0) {
+            noCycleFound = await dfsCycleDetection(i, state, { flag: true });
+
+            if (noCycleFound)
+                break;
+        }
+    }
+
+    if (!noCycleFound) {
+        addTextToConsole("no cycle found");
+    } else {
+        addTextToConsole("cycle found");
+        addTextToConsole("red edges and nodes show nodes and edges that are a part of a cycle");
+    }
+}
+
+kncdButton.onclick = () => {
+    clearConsole();
+    resetGraph();
+    addTextToConsole(`starting kahn's algorithn to detect a cycle`);
+    kahn();
 }
 
 bfButton.onclick = () => {
@@ -615,6 +650,86 @@ async function dijkstra(at = 0) {
     }
 }
 
+async function dfsCycleDetection(at, visitedState, flag) {
+    if (visitedState[at] === 2) {
+        return false;
+    }
+
+    if (visitedState[at] === 1) {
+        visitedState[at] = 3;
+        markAllEdgesVisited();
+        markAllNodesVisited();
+        await delay(delayValue);
+        return true;
+    }
+
+    visitedState[at] = 1;
+    markNodeVisiting(at);
+    await delay(delayValue);
+
+    for (let i = 0; i < directedGraph[at].length; i++) {
+        let [to, w, edgeIndex] = directedGraph[at][i];
+        markEdgeVisiting(edgeIndex);
+        await delay(delayValue);
+
+        if (await dfsCycleDetection(to, visitedState, flag)) {
+            if (flag.flag) {
+                markEdgeSelected(edgeIndex);
+                await delay(delayValue);
+                markNodeSelected(at);
+                await delay(delayValue);
+            }
+
+            if (visitedState[at] === 3) {
+                flag.flag = false;
+            }
+
+            return true;
+        }
+
+        markEdgeVisited(edgeIndex);
+        await delay(delayValue);
+    }
+
+    visitedState[at] = 2;
+    markNodeVisited(at);
+    await delay(delayValue);
+    return false;
+}
+
+function kahn() {
+    let indegrees = new Array(v).fill(0);
+    let queue = [];
+    let count = 0;
+
+    for (let i = 0; i < e; i++)
+        indegrees[edgeList[i][1]]++;
+    
+    for (let i = 0; i < v; i++) {
+        if (indegrees[i] == 0)
+            queue.push(i);
+    }
+
+    while (queue.length != 0) {
+        let at = queue.shift();
+        count++;
+
+        for (let i = 0; i < directedGraph[at]; i++) {
+            let [to, w, edgeIndex] = directedGraph[at][i];
+            indegrees[to]--;
+
+            if (indegrees[to] == 0)
+                queue.push(to);
+        }
+    }
+
+    if (count == v) {
+        addTextToConsole("no cycle found")
+    } else {
+        addTextToConsole("cycle found")
+    }
+}
+
 async function bridgesDFS(at, parent, bridges, ids, lowLinks, counter) {
     ids[at] = counter.id;
     lowLinks[at] = counter.id;
@@ -797,18 +912,41 @@ async function primsMST() {
 
     while (!allVisited()) {
         let at = minKey(distance, mstSet);
+
+        if (mstSet[at])
+            continue;
+
         mstSet[at] = true;
         totalCost += distance[at][0];
+
+        if (distance[at][1] !== -1) {
+            markEdgeSelected(distance[at][1]);
+            await delay(delayValue);
+
+            if (!nodes[edgeList[distance[at][1]][0]].hasState("select")) {
+                markNodeSelected(edgeList[distance[at][1]][0]);
+                await delay(delayValue);
+            }    
+
+            if (!nodes[edgeList[distance[at][1]][1]].hasState("select")) {
+                markNodeSelected(edgeList[distance[at][1]][1]);
+                await delay(delayValue);
+            }    
+        }
         
         if (!nodes[at].hasState("select")) {
             markNodeSelected(at);
             await delay(delayValue);
         }
 
-        for (let i = 0; i < directedGraph[at].length; i++) {
-            let to = directedGraph[at][i][0];
-            let w = directedGraph[at][i][1];
-            let edgeIndex = directedGraph[at][i][2];
+        for (let i = 0; i < undirectedGraph[at].length; i++) {
+            let to = undirectedGraph[at][i][0];
+            let w = undirectedGraph[at][i][1];
+            let edgeIndex = undirectedGraph[at][i][2];
+            
+            if (edges[edgeIndex].hasState("select"))
+                continue;
+
             markEdgeVisiting(edgeIndex);
             await delay(delayValue);
 
@@ -822,13 +960,8 @@ async function primsMST() {
                     await delay(delayValue);
                 }
 
-                markEdgeSelected(edgeIndex);
+                markEdgeVisited(edgeIndex);
                 await delay(delayValue);
-                
-                if (!nodes[to].hasState("select")) {
-                    markNodeSelected(to);
-                    await delay(delayValue);
-                }
             } else {
                 markEdgeVisited(edgeIndex);
                 await delay(delayValue);
@@ -936,7 +1069,6 @@ async function bellmonFord(at = 0) {
 
 async function floydWarshall() {
     let matrix = [...directedGraphMatrix];
-    console.log(matrix);
 
     for (let i = 0; i < v; i++)
         matrix[i][i][0] = 0;

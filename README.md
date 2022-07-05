@@ -14,6 +14,7 @@ Currently, this application supports following algorithms.
     * Prim's Algorithm
     * Kruskal's Algorithm
 * Single Source Shortest Path
+    * Dijkstra's Algorithm
     * Bellmon Ford
 * All Pairs Shortest Paths
     * Floyd Warshall
@@ -23,3 +24,6 @@ Currently, this application supports following algorithms.
     * DFS
 * Bridges
     * DFS
+* Cycle Detection
+    * DFS
+    * Kahn's Algorithm
