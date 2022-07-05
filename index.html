@@ -18,7 +18,7 @@
     <nav class="navbar bg-light">
         <div class="container-fluid">
             <div class="d-flex align-items-center justify-content-between w-100">
-                <a class="navbar-brand" href=".">Graph Algorithms Visualiser</a>
+                <a class="navbar-brand" href=".">Graph Algorithms Visualization</a>
                 <p class="m-0 fw-bold">Made By: <a class="" href="https://www.linkedin.com/in/itsmrvaibhav/"
                         target="_blank">Vaibhav</a></p>
             </div>
@@ -49,17 +49,17 @@
                                                 <p class="m-0 fs-6">> Next e lines: 3 space-seperated integer representing edge start, edge end, and edge weight</p>
                                                 <p class="m-0 fs-6">> Follow 0-based indexing for nodes</p>
                                             </div>
-                                            <textarea class="form-control" name="" rows="10" style="resize: none;" placeholder="Example:
-3 4
+                                            <textarea class="form-control" name="" rows="10" id="customGraphInputInput" style="resize: none;" placeholder="">4 5
 0 1 4
 1 2 5
 2 3 17
 1 3 10
-                                            "></textarea>
+2 1 6
+                                            </textarea>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">Create Graph</button>
+                                            <button type="button" class="btn btn-success" id="customGraphButton" data-bs-dismiss="modal">Create Graph</button>
                                         </div>
                                     </div>
                                 </div>
@@ -68,9 +68,9 @@
                         <div class="me-2 bg-light rounded ps-3 pe-3 d-flex align-items-center justify-content-center"
                             style="width: 100%; max-width: 100%;">
                             <p class="m-0 me-3">Speed</p>
-                            <input type="range" class="form-range" id="animationSpeed" min="50" max="3000" step="100"
+                            <input type="range" class="form-range" id="animationSpeed" min="50" max="3000" step="50"
                                 value="500">
-                            <p class="m-0 ms-3" id="animationSpeedText">500</p>
+                            <p class="m-0 ms-3" id="animationSpeedText" style="white-space: nowrap;">500 ms</p>
                         </div>
                     </div>
                     <div class="w-100"></div>

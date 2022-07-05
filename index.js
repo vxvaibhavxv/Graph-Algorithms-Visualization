@@ -2,28 +2,62 @@ const rightPanel = document.getElementById("right-panel");
 const consoleElement = document.getElementById("console");
 const animationSpeed = document.getElementById("animationSpeed");
 const animationSpeedText = document.getElementById("animationSpeedText");
+const customGraphButton = document.getElementById("customGraphButton");
+const customGraphInputInput = document.getElementById("customGraphInputInput");
 
-animationSpeed.oninput = () => {
-    delayValue = animationSpeed.value;
-    animationSpeedText.innerHTML = delayValue;
-}
+let directedGraph = {
+    0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
+    1: [[5, 18, 3], [6, 25, 4]],
+    2: [[4, 40, 5]],
+    3: [[2, 10, 6], [4, 12, 7]],
+    4: [[1, 42, 8]],
+    5: [],
+    6: [[4, 23, 9]],
+};
 
-function addTextToConsole(text) {
-    consoleElement.insertAdjacentHTML("beforeEnd", `<p class="text-warning m-0"><span class="text-light">-></span> ${text}</p>`);
-    consoleElement.scrollTo(0, consoleElement.offsetHeight);
-}
+let undirectedGraph = {
+    0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
+    1: [[0, 3, 0], [5, 18, 3], [6, 25, 4], [4, 42, 8]],
+    2: [[4, 40, 5], [0, 6, 1], [3, 10, 6]],
+    3: [[2, 10, 6], [4, 12, 7], [0, 16, 2]],
+    4: [[1, 42, 8], [2, 40, 5], [3, 12, 7], [6, 23, 9]],
+    5: [[1, 18, 3]],
+    6: [[4, 23, 9], [1, 25, 4]]
+};
 
-function clearConsole() {
-    consoleElement.innerHTML = "";
-}
+// from to weight edge-index
+let edgeList = [
+    [0, 1, 3, 0],
+    [0, 2, 6, 1],
+    [0, 3, 16, 2],
+    [1, 5, 18, 3],
+    [1, 6, 25, 4],
+    [2, 4, 40, 5],
+    [3, 2, 10, 6],
+    [3, 4, 12, 7],
+    [4, 1, 42, 8],
+    [6, 4, 23, 9],
+]
 
-function randomHEXColour() {
-    return '#' + Math.random().toString(16).slice(-6);
-}
+let directedGraphMatrix = [
+    [[-1, -1], [3, 0], [6, 1], [16, 2], [-1, -1], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [18, 3], [25, 4],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [40, 5], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [10, 6], [-1, -1], [12, 7], [-1, -1], [-1, -1],],
+    [[-1, -1], [42, 8], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [23, 9], [-1, -1], [-1, -1],]
+];
 
-function getNodeLabel(index) {
-    return data.nodes[index].label;
-}
+let undirectedGraphMatrix = [
+    [[-1, -1], [3, 0], [6, 1], [16, 2], [-1, -1], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [18, 3], [25, 4],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [40, 5], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [10, 6], [-1, -1], [12, 7], [-1, -1], [-1, -1],],
+    [[-1, -1], [42, 8], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
+    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [23, 9], [-1, -1], [-1, -1],]
+];
 
 let data = {
     nodes: [
@@ -49,9 +83,10 @@ let data = {
     ]
 };
 
-let graphWidth = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
-let graphHeight = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
-
+// let graphWidth = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
+// let graphHeight = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
+let graphWidth = rightPanel.offsetWidth;
+let graphHeight = rightPanel.offsetHeight;
 let config = {
     container: "mountNode",
     width: graphWidth,
@@ -79,7 +114,7 @@ let config = {
         }
     },
     defaultEdge: {
-        type: 'line',
+        type: 'quadratic',
         style: {
             endArrow: true,
             stroke: "black",
@@ -90,6 +125,9 @@ let config = {
             autoRotate: true,
             refY: 10
         },
+    },
+    modes: {
+        default: ['drag-canvas', 'drag-node', 'zoom-canvas'],
     },
     nodeStateStyles: {
         visiting: {
@@ -115,6 +153,157 @@ let config = {
     }
 };
 
+function wrapWith(word, type = "primary") {
+    return `<span class="text-${type}">${word}</span>`
+}
+
+function loadWelcomeConsoleText() {
+    addTextToConsole("Welcome to Graph Algorithms Visualization");
+    addTextToConsole("A web application to visualise various graph and tree algorithms");
+    addTextToConsole("Built with ❤️ by Vaibhav (@itsmrvaibhav)");
+    addTextToConsole(`Use the ${wrapWith("New Graph")} button to generate a random graph`);
+    addTextToConsole(`Use the ${wrapWith("Custom Input")} button to enter a custom graph; do follow the input guidelines :)`);
+    addTextToConsole(`Use the ${wrapWith("Speed")} slider to change the animation speed`);
+    addTextToConsole(`${wrapWith("Click & Drag")} the graph to move it around`);
+    addTextToConsole(`${wrapWith("Click & Drag")} any node to move to around at your will`);
+    addTextToConsole(`Click on any algorithm's name under the ${wrapWith("Name")} column to run that algorithm over the loaded graph`);
+}
+
+let v = 7, e = 10;
+let visited = new Array(v).fill(false);
+let graph = new G6.Graph(config);
+graph.data(data);
+graph.render();
+let nodes = graph.getNodes();
+let edges = graph.getEdges();
+let delayValue = 100;
+loadWelcomeConsoleText();
+
+function buildGraphs(inputEdges) {
+    let nNodes = inputEdges[0][0], nEdges = inputEdges[0][1];
+    inputEdges.shift();
+    v = nNodes;
+    e = nEdges;
+    visited = new Array(v).fill(false); // visited array created
+    edgeList = inputEdges; // edge list created
+    let dg = {}, udg = {}, inputData = {nodes: [], edges: []};
+    let dm = new Array(v).fill(new Array(v).fill([-1, -1]));
+    let udm = new Array(v).fill(new Array(v).fill([-1, -1]));
+
+    for (let i = 0; i < e; i++) {
+        let [src, dest, weight, edgeIndex] = inputEdges[i];
+        
+        if (!(src in dg))
+            dg[src] = [];
+
+        if (!(dest in dg))
+            dg[dest] = [];
+
+        if (!(src in udg)) {
+            udg[src] = [];
+            inputData.nodes.push({
+                id: `node${src}`,
+                label: `${src}`
+            })
+        }
+
+        if (!(dest in udg)) {
+            udg[dest] = [];
+            inputData.nodes.push({
+                id: `node${dest}`,
+                label: `${dest}`
+            })
+        }
+
+        dg[src].push([dest, weight, edgeIndex]);
+        udg[src].push([dest, weight, edgeIndex]);
+        udg[dest].push([src, weight, edgeIndex]);
+        dm[src][dest] = [weight, edgeIndex];
+        udm[src][dest] = [weight, edgeIndex];
+        udm[dest][src] = [weight, edgeIndex];
+        inputData.edges.push({
+            source: `node${src}`,
+            target: `node${dest}`,
+            label: String(weight)
+        });
+    }
+
+    directedGraph = dg; // directed graph created
+    undirectedGraph = udg; // undirected graph created
+    directedGraphMatrix = dm; // directed graph matrix created
+    undirectedGraphMatrix = udm; // undirected graph matrix created
+    data = inputData;
+    // printAllGraphs();
+    resetGraphData();
+    addTextToConsole("new graph created using custom input successfully!")
+}
+
+function resetGraphData() {
+    graph.changeData(data);
+    nodes = graph.getNodes();
+    edges = graph.getEdges();
+}
+
+function printAllGraphs() {
+    console.log(edgeList);
+    console.log(directedGraph);
+    console.log(undirectedGraph);
+    console.log(directedGraphMatrix);
+    console.log(undirectedGraphMatrix);
+    console.log(data);
+}
+
+customGraphButton.onclick = () => {
+    let string = customGraphInputInput.value.trim();
+    
+    if (string.length == 0) {
+        addTextToConsole("error: empty input")
+        return;
+    }
+
+    let parts = string.split(/\n/);
+    console.log(parts);
+    
+    for (let i = 0; i < parts.length; i++) {
+        parts[i] = parts[i].split(' ').map((x) => isNaN(x) ? NaN : Number(x));
+        parts[i].push(i - 1);
+    }
+
+    for (let i = 0; i < parts.length; i++) {
+        for (let j = 0; j < parts[i].length; j++) {
+        console.log(parts[i][j]);
+            if (isNaN(parts[i][j])) {
+                addTextToConsole("error: non-digit input found");
+                return;
+            }
+        }
+    }
+
+    buildGraphs(parts);
+};
+
+animationSpeed.oninput = () => {
+    delayValue = animationSpeed.value;
+    animationSpeedText.innerHTML = delayValue + " ms";
+}
+
+function addTextToConsole(text) {
+    consoleElement.insertAdjacentHTML("beforeEnd", `<p class="text-warning m-0"><span class="text-light">-></span> ${text}</p>`);
+    consoleElement.scrollTo(0, consoleElement.offsetHeight);
+}
+
+function clearConsole() {
+    consoleElement.innerHTML = "";
+}
+
+function randomHEXColour() {
+    return '#' + Math.random().toString(16).slice(-6);
+}
+
+function getNodeLabel(index) {
+    return data.nodes[index].label;
+}
+
 function arrayToString(order) {
     return "[" + order.join(", ") + "]";
 }
@@ -128,10 +317,6 @@ const fwButton = document.getElementById("fwButton");
 const dfsapButton = document.getElementById("dfsapButton");
 const dfsbButton = document.getElementById("dfsbButton");
 const dfssccButton = document.getElementById("dfssccButton");
-
-let graph = new G6.Graph(config);
-graph.data(data);
-graph.render();
 
 dfsButton.onclick = async () => {
     clearConsole();
@@ -275,55 +460,6 @@ dfsbButton.onclick = async () => {
     }
 }
 
-let g = {
-    0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
-    1: [[5, 18, 3], [6, 25, 4]],
-    2: [[4, 40, 5]],
-    3: [[2, 10, 6], [4, 12, 7]],
-    4: [[1, 42, 8]],
-    5: [],
-    6: [[4, 23, 9]],
-};
-
-let dg = {
-    0: [[1, 3, 0], [2, 6, 1], [3, 16, 2]],
-    1: [[0, 3, 0], [5, 18, 3], [6, 25, 4], [4, 42, 8]],
-    2: [[4, 40, 5], [0, 6, 1], [3, 10, 6]],
-    3: [[2, 10, 6], [4, 12, 7], [0, 16, 2]],
-    4: [[1, 42, 8], [2, 40, 5], [3, 12, 7], [6, 23, 9]],
-    5: [[1, 18, 3]],
-    6: [[4, 23, 9], [1, 25, 4]],
-};
-
-// from to weight edge-index
-let edgeList = [
-    [0, 1, 3, 0],
-    [0, 2, 6, 1],
-    [0, 3, 16, 2],
-    [1, 5, 18, 3],
-    [1, 6, 25, 4],
-    [2, 4, 40, 5],
-    [3, 2, 10, 6],
-    [3, 4, 12, 7],
-    [4, 1, 42, 8],
-    [6, 4, 23, 9],
-]
-
-let graphMatrix = [
-    [[-1, -1], [3, 0], [6, 1], [16, 2], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [18, 3], [25, 4],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [40, 5], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [10, 6], [-1, -1], [12, 7], [-1, -1], [-1, -1],],
-    [[-1, -1], [42, 8], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1],],
-    [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [23, 9], [-1, -1], [-1, -1],]
-];
-
-let v = 7;
-let visited = new Array(v).fill(false);
-let nodes = graph.getNodes();
-let edges = graph.getEdges();
-let delayValue = 100;
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 function resetGraph() {
@@ -359,8 +495,8 @@ async function sccDFS(at, points, ids, lowLinks, counter, recursionStack, onStac
     markNodeVisiting(at);
     await delay(delayValue);
 
-    for (let i = 0; i < g[at].length; i++) {
-        let [to, w, edgeIndex] = g[at][i];
+    for (let i = 0; i < directedGraph[at].length; i++) {
+        let [to, w, edgeIndex] = directedGraph[at][i];
         markEdgeVisiting(edgeIndex);
         await delay(delayValue);
 
@@ -408,8 +544,8 @@ async function bridgesDFS(at, parent, bridges, ids, lowLinks, counter) {
     markNodeVisiting(at);
     await delay(delayValue);
 
-    for (let i = 0; i < dg[at].length; i++) {
-        let [to, w, edgeIndex] = dg[at][i];
+    for (let i = 0; i < undirectedGraph[at].length; i++) {
+        let [to, w, edgeIndex] = undirectedGraph[at][i];
 
         if (to == parent) {
             continue;
@@ -450,8 +586,8 @@ async function articulationPointsDFS(at, parent, points, ids, lowLinks, counter)
     await delay(delayValue);
     let children = 0, ap = false;
 
-    for (let i = 0; i < dg[at].length; i++) {
-        let [to, w, edgeIndex] = dg[at][i];
+    for (let i = 0; i < undirectedGraph[at].length; i++) {
+        let [to, w, edgeIndex] = undirectedGraph[at][i];
 
         if (to == parent) {
             continue;
@@ -500,10 +636,10 @@ async function dfs(at, order) {
     markNodeVisiting(at);
     await delay(delayValue);
 
-    for (let i = 0; i < g[at].length; i++) {
-        let to = g[at][i][0];
-        let w = g[at][i][1];
-        let edgeIndex = g[at][i][2];
+    for (let i = 0; i < directedGraph[at].length; i++) {
+        let to = directedGraph[at][i][0];
+        let w = directedGraph[at][i][1];
+        let edgeIndex = directedGraph[at][i][2];
         markEdgeVisiting(edgeIndex);
         await delay(delayValue);
 
@@ -529,10 +665,10 @@ async function bfs(start = 0, order) {
         markNodeVisiting(at);
         await delay(delayValue);
 
-        for (let i = 0; i < g[at].length; i++) {
-            let to = g[at][i][0];
-            let w = g[at][i][1];
-            let edgeIndex = g[at][i][2];
+        for (let i = 0; i < directedGraph[at].length; i++) {
+            let to = directedGraph[at][i][0];
+            let w = directedGraph[at][i][1];
+            let edgeIndex = directedGraph[at][i][2];
             markEdgeVisiting(edgeIndex);
             await delay(delayValue);
     
@@ -596,10 +732,10 @@ async function primsMST() {
             await delay(delayValue);
         }
 
-        for (let i = 0; i < dg[at].length; i++) {
-            let to = dg[at][i][0];
-            let w = dg[at][i][1];
-            let edgeIndex = dg[at][i][2];
+        for (let i = 0; i < undirectedGraph[at].length; i++) {
+            let to = undirectedGraph[at][i][0];
+            let w = undirectedGraph[at][i][1];
+            let edgeIndex = undirectedGraph[at][i][2];
             markEdgeVisiting(edgeIndex);
             await delay(delayValue);
 
@@ -726,7 +862,7 @@ async function bellmonFord(at = 0) {
 }
 
 async function floydWarshall() {
-    let matrix = [...graphMatrix];
+    let matrix = [...directedGraphMatrix];
 
     for (let k = 0; k < v; k++) {
         for (let i = 0; i < v; i++) {
