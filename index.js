@@ -656,7 +656,7 @@ function kahn() {
         let at = queue.shift();
         count++;
 
-        for (let i = 0; i < directedGraph[at]; i++) {
+        for (let i = 0; i < directedGraph[at].length; i++) {
             let [to, w, edgeIndex] = directedGraph[at][i];
             indegrees[to]--;
 
