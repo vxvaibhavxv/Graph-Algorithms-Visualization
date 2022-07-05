@@ -119,6 +119,7 @@ let delayValue = 100;
 loadWelcomeConsoleText();
 
 function buildGraphs(inputEdges) {
+    resetGraph();
     let nNodes = inputEdges[0][0], nEdges = inputEdges[0][1];
     inputEdges.shift();
     v = nNodes;
@@ -152,6 +153,7 @@ function buildGraphs(inputEdges) {
             udg[src] = [];
             inputData.nodes.push({
                 id: `node${src}`,
+                value: src,
                 label: `${src}`
             })
         }
@@ -160,6 +162,7 @@ function buildGraphs(inputEdges) {
             udg[dest] = [];
             inputData.nodes.push({
                 id: `node${dest}`,
+                value: dest,
                 label: `${dest}`
             })
         }
@@ -182,6 +185,7 @@ function buildGraphs(inputEdges) {
     directedGraphMatrix = dm; // directed graph matrix created
     undirectedGraphMatrix = udm; // undirected graph matrix created
     data = inputData;
+    data.nodes.sort((a, b) => a.value - b.value);
     // printAllGraphs();
     resetGraphData();
     addTextToConsole("new graph created using custom input successfully!")
@@ -503,7 +507,7 @@ async function sccDFS(at, points, ids, lowLinks, counter, recursionStack, onStac
         }
 
         markEdgeVisited(edgeIndex);
-            await delay(delayValue);
+        await delay(delayValue);
     }
 
     if (ids[at] == lowLinks[at]) {
@@ -523,6 +527,11 @@ async function sccDFS(at, points, ids, lowLinks, counter, recursionStack, onStac
         }
 
         points.push(scc);
+
+        for (let i = 0; i < scc.length; i++) {
+            markNodeSelectedWithColour(scc[i], colour);
+            await delay(delayValue);
+        }
     } else {
         markNodeVisited(at);
         await delay(delayValue);
