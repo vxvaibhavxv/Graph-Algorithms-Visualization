@@ -1,17 +1,30 @@
-const rightPanel = document.getElementById("right-panel");
-const consoleElement = document.getElementById("console");
-const animationSpeed = document.getElementById("animationSpeed");
-const animationSpeedText = document.getElementById("animationSpeedText");
-const customGraphButton = document.getElementById("customGraphButton");
-const customGraphInputInput = document.getElementById("customGraphInputInput");
-const newRandomGraphButton = document.getElementById("newRandomGraphButton");
-
 function buildRandomGraph() {
     let index = Math.floor(Math.random() * randomGraphs.length);
     let copy = [...randomGraphs[index]]
     buildGraphs(copy);
 }
 
+const rightPanel = document.getElementById("right-panel");
+const graphType = document.getElementById("graph-type");
+const consoleElement = document.getElementById("console");
+const animationSpeed = document.getElementById("animationSpeed");
+const animationSpeedText = document.getElementById("animationSpeedText");
+const customGraphButton = document.getElementById("customGraphButton");
+const customGraphInputInput = document.getElementById("customGraphInputInput");
+const newRandomGraphButton = document.getElementById("newRandomGraphButton");
+const dfsButton = document.getElementById("dfsButton");
+const bfsButton = document.getElementById("bfsButton");
+const mstpButton = document.getElementById("mstpButton");
+const mstkButton = document.getElementById("mstkButton");
+const bfButton = document.getElementById("bfButton");
+const fwButton = document.getElementById("fwButton");
+const dfsapButton = document.getElementById("dfsapButton");
+const dfsbButton = document.getElementById("dfsbButton");
+const dfssccButton = document.getElementById("dfssccButton");
+const dfscdButton = document.getElementById("dfscdButton");
+const kncdButton = document.getElementById("kncdButton");
+const undirectedAlgos = [dfsButton, bfsButton, mstkButton, mstpButton, dfsapButton, dfsbButton];
+const directedAlgos = [dfsButton, bfsButton, bfButton, fwButton, dfssccButton, dfscdButton, kncdButton, djButton];
 let directedGraph = {};
 let undirectedGraph = {};
 let edgeList = []
@@ -19,9 +32,6 @@ let directedGraphMatrix = [];
 let undirectedGraphMatrix = [];
 let data = {};
 let lastRandomGraphIndex = -1;
-
-// let graphWidth = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
-// let graphHeight = Math.min(rightPanel.offsetWidth, rightPanel.offsetHeight);
 let graphWidth = rightPanel.offsetWidth;
 let graphHeight = rightPanel.offsetHeight;
 let config = {
@@ -90,6 +100,30 @@ let config = {
     }
 };
 
+graphType.onchange = () => {
+    if (graphType.checked) {
+        for (const b of undirectedAlgos) {
+            b.classList.remove("table-active");
+            b.parentElement.classList.add("d-none");
+        }
+
+        for (const b of directedAlgos) {
+            b.classList.add("table-active");
+            b.parentElement.classList.remove("d-none");
+        }
+    } else {
+        for (const b of directedAlgos) {
+            b.classList.remove("table-active");
+            b.parentElement.classList.add("d-none");
+        }
+
+        for (const b of undirectedAlgos) {
+            b.classList.add("table-active");
+            b.parentElement.classList.remove("d-none");
+        }
+    }
+};
+
 function wrapWith(word, type = "primary") {
     return `<span class="text-${type}">${word}</span>`
 }
@@ -117,6 +151,7 @@ let edges = graph.getEdges();
 buildRandomGraph();
 let delayValue = 100;
 loadWelcomeConsoleText();
+graphType.dispatchEvent(new Event("change")); // to add initial classes to table rows according to "undirected" graph type
 
 function buildGraphs(inputEdges) {
     resetGraph();
@@ -171,8 +206,6 @@ function buildGraphs(inputEdges) {
         udg[src].push([dest, weight, edgeIndex]);
         udg[dest].push([src, weight, edgeIndex]);
         dm[src][dest] = [weight, edgeIndex];
-        // udm[src][dest] = [weight, edgeIndex]; 
-        // udm[dest][src] = [weight, edgeIndex]; 
         inputData.edges.push({
             source: `node${src}`,
             target: `node${dest}`,
@@ -186,7 +219,6 @@ function buildGraphs(inputEdges) {
     undirectedGraphMatrix = udm; // undirected graph matrix created
     data = inputData;
     data.nodes.sort((a, b) => a.value - b.value);
-    // printAllGraphs();
     resetGraphData();
     addTextToConsole("new graph created using custom input successfully!")
 }
@@ -263,18 +295,6 @@ function arrayToString(order) {
     return "[" + order.join(", ") + "]";
 }
 
-const dfsButton = document.getElementById("dfsButton");
-const bfsButton = document.getElementById("bfsButton");
-const mstpButton = document.getElementById("mstpButton");
-const mstkButton = document.getElementById("mstkButton");
-const bfButton = document.getElementById("bfButton");
-const fwButton = document.getElementById("fwButton");
-const dfsapButton = document.getElementById("dfsapButton");
-const dfsbButton = document.getElementById("dfsbButton");
-const dfssccButton = document.getElementById("dfssccButton");
-const dfscdButton = document.getElementById("dfscdButton");
-const kncdButton = document.getElementById("kncdButton");
-
 dfsButton.onclick = async () => {
     clearConsole();
     resetGraph();
@@ -308,6 +328,9 @@ bfsButton.onclick = async () => {
 }
 
 mstkButton.onclick = () => {
+    if (graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     addTextToConsole(`starting kruskal's algorithm to find a minimum spanning tree`);
@@ -316,6 +339,9 @@ mstkButton.onclick = () => {
 }
 
 mstpButton.onclick = () => {
+    if (graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     addTextToConsole(`starting prim's algorithm to find a minimum spanning tree`);
@@ -324,6 +350,9 @@ mstpButton.onclick = () => {
 }
 
 dfscdButton.onclick = async () => {
+    if (!graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     addTextToConsole(`starting depth first traversal to detect a cycle`);
@@ -348,6 +377,9 @@ dfscdButton.onclick = async () => {
 }
 
 kncdButton.onclick = () => {
+    if (!graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     addTextToConsole(`starting kahn's algorithn to detect a cycle`);
@@ -355,6 +387,9 @@ kncdButton.onclick = () => {
 }
 
 bfButton.onclick = () => {
+    if (!graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     addTextToConsole(`starting bellmon ford's algorithm from ${getNodeLabel(0)} node to find single source shortest path`);
@@ -362,6 +397,9 @@ bfButton.onclick = () => {
 }
 
 djButton.onclick = () => {
+    if (!graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     addTextToConsole(`starting dijkstra's algorithm from ${getNodeLabel(0)} node to find single source shortest path`);
@@ -369,6 +407,9 @@ djButton.onclick = () => {
 }
 
 fwButton.onclick = () => {
+    if (!graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     addTextToConsole(`starting floyd warshall's algorithm to find all pairs shortest path`);
@@ -376,6 +417,9 @@ fwButton.onclick = () => {
 }
 
 dfssccButton.onclick = async () => {
+    if (!graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     let points = [];
@@ -404,6 +448,9 @@ dfssccButton.onclick = async () => {
 }
 
 dfsapButton.onclick = async () => {
+    if (graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     let points = [];
@@ -431,6 +478,9 @@ dfsapButton.onclick = async () => {
 }
 
 dfsbButton.onclick = async () => {
+    if (graphType.checked)
+        return;
+
     clearConsole();
     resetGraph();
     let bridges = [];

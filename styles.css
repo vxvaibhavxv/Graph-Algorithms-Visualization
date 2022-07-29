@@ -1,3 +1,7 @@
 * {
     font-family: "consolas" !important;
 }
+
+.invalid {
+    cursor: not-allowed !important;
+}
